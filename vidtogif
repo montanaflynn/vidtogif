@@ -1,0 +1,158 @@
+#!/bin/sh
+## Author: Montana Flynn
+## Updated: 2014-10-08
+    
+# Define constants
+NAME="vidtogif"
+VERSION="$NAME version 1.0"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+RED="\033[0;31m"
+NORMAL="\033[0m"
+
+# Check Dependencies
+array=( "convert" "ffmpeg" )
+for i in "${array[@]}"
+do
+    command -v $i >/dev/null 2>&1 || { 
+        if [ "$i" = "convert" ]; then 
+            echo >&2 "$NAME requires imagemagick"; 
+        else
+            echo >&2 "$NAME requires $i"; 
+        fi;
+        exit 1; 
+    }
+done
+
+# Function to print usage 
+print_usage() {
+    USAGE="
+Usage: 
+    $NAME [-r -w <integer> -h <integer> -u -v] input.mp4 output.gif
+
+Options: 
+    -r: Framerate per second <integer>
+    -w: Set max width <integer>
+    -h: Set max height <integer>
+    -u: Print usage information
+    -v: Version
+
+Example:
+    Example: $NAME -r 10 -w 600 input.mp4 output.gif
+
+License: 
+
+    This is free software. You may redistribute copies of it under the terms
+    of the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.
+    There is NO WARRANTY, to the extent permitted by law.
+    "
+    printf %s\\n "$USAGE"
+}
+
+# Set default framerate per second
+FPS=10
+
+# Function to change FPS from option
+set_fps() {
+    if [ "$1" -eq "$1" ] 2>/dev/null; then
+      FPS=$1
+    else
+      echo "\\n${RED}Rate per second must be a number${NORMAL}"
+      print_usage
+      exit 1
+    fi
+}
+
+# Check for optional width or heights and apply to scale
+SCALE=""
+WIDTH=""
+HEIGHT=""
+
+set_width() {
+    if [ "$1" -eq "$1" ] 2>/dev/null; then
+      WIDTH=$1
+      set_scale
+    else
+      echo "\\n${RED}Width must be a number${NORMAL}"
+      print_usage
+      exit 1
+    fi
+}
+
+set_height() {
+    if [ "$1" -eq "$1" ] 2>/dev/null; then
+      HEIGHT=$1
+      set_scale
+    else
+      echo "\\n${RED}Height must be a number${NORMAL}"
+      print_usage
+      exit 1
+    fi
+}
+
+set_scale() {
+    if [ -z != $WIDTH ] && [ -z != $HEIGHT ]; then
+        SCALE="-vf scale=$WIDTH:$HEIGHT"
+    elif [ -z != $WIDTH ]; then
+        SCALE="-vf scale=$WIDTH:-1"
+    elif [ -z != $HEIGHT ]; then
+        SCALE="-vf scale=-1:$HEIGHT"
+    fi
+}
+
+# Parse optional arguments
+while getopts r:w:h:uv OPT; do
+    case "$OPT" in
+        u)
+            print_usage
+            exit 0
+            ;;
+        v)
+            echo $VERSION
+            exit 0
+            ;;
+        r)
+            set_fps $OPTARG
+            ;;
+        w)
+            set_width $OPTARG
+            ;;
+        h)
+            set_height $OPTARG
+            ;;
+        ?)
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
+# Remove the option flags from args
+shift `expr $OPTIND - 1`
+
+# We need two args for input and ouput
+if [ $# != 2 ]; then
+    echo "\\n${RED}Missing input and output files${NORMAL}"
+    print_usage
+    exit 1
+fi
+
+echo "Converting ${YELLOW}$1${NORMAL} to ${YELLOW}$2${NORMAL}"
+VIDPATH=$(cd $(dirname $1); pwd)/$(basename $1)
+GIFPATH=$(cd $(dirname $2); pwd)/$(basename $2)
+
+echo "Created temporary image directory at /tmp/frames"
+mkdir /tmp/frames && cd /tmp/frames
+
+echo "Converting video to images at ${YELLOW}$FPS${NORMAL} FPS"
+ffmpeg -loglevel error -i $VIDPATH -r $FPS $SCALE ./ffout%03d.png
+
+echo "Turning individual images into animated gif"
+convert -loop 0 ./ffout*.png tmp.gif
+convert -layers Optimize tmp.gif $GIFPATH
+
+echo "Cleaning up temporary image file directory"
+rm -rf /tmp/frames
+
+SIZE=`ls -lah $GIFPATH | awk '{ print $5}'`
+echo "${GREEN}Gif ($SIZE) ready at $GIFPATH"
