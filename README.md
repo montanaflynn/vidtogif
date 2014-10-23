@@ -1,15 +1,13 @@
 # vidtogif
 
-A simple shell script I wrote to learn more about creating command line tools. 
-
 ```
 Usage: 
-    vidtogif [-r <int> -w <int> -h <int> -u -v] input.mp4 output.gif
+    vidtogif [-r <integer> -w <integer> -h <integer> -u -v] input.mp4 output.gif
 
 Options: 
-    -r: Framerate per second <int>
-    -w: Set max width <int>
-    -h: Set max height <int>
+    -r: Framerate per second <integer>
+    -w: Set max width <integer>
+    -h: Set max height <integer>
     -u: Print usage information
     -v: Version
 
