@@ -1,21 +1,22 @@
 # vidtogif
 
-A simple shell script I wrote to learn more about creating command line tools in various shells. It works by converting the video to images using ffmpeg and then converting those images into an animated gif with imagemagick.
+A simple shell script I wrote to learn more about creating command line tools. It works by converting the video to images using ffmpeg and then converting those images into an animated gif with imagemagick.
 
-Of course you could always do it in a oneliner:
+```
+Usage: 
+    vidtogif [-r <integer> -w <integer> -h <integer> -u -v] input.mp4 output.gif
 
-`ffmpeg -i input.mp4 -vf scale=600:-1 -r 5 -f image2pipe -vcodec ppm - | convert - gif:- | convert -layers Optimize - output.gif`
+Options: 
+    -r: Framerate per second <integer>
+    -w: Set max width <integer>
+    -h: Set max height <integer>
+    -u: Print usage information
+    -v: Version
 
-But then you miss out on
+Example:
+    Example: vidtogif -r 10 -w 600 input.mp4 output.gif
+```
 
-- Dependency checking
-- Usage and help information
-- Nice error notifications
-
-TL;DR
-
-`vid2gif -w 600 -r 5 ./screencast.mov ./output.gif`
-
-Here's an example of a gif created with the command above:
+Here's an example of a gif created with vidtogif:
 
 ![gif of me making vidtogif](http://i.imgur.com/RwESKPg.gif)
