@@ -1,15 +1,15 @@
 # vidtogif
 
-A simple shell script I wrote to learn more about creating command line tools. It works by converting the video to images using ffmpeg and then converting those images into an animated gif with imagemagick.
+A simple shell script I wrote to learn more about creating command line tools. 
 
 ```
 Usage: 
-    vidtogif [-r <integer> -w <integer> -h <integer> -u -v] input.mp4 output.gif
+    vidtogif [-r <int> -w <int> -h <int> -u -v] input.mp4 output.gif
 
 Options: 
-    -r: Framerate per second <integer>
-    -w: Set max width <integer>
-    -h: Set max height <integer>
+    -r: Framerate per second <int>
+    -w: Set max width <int>
+    -h: Set max height <int>
     -u: Print usage information
     -v: Version
 
